@@ -1,0 +1,13 @@
+services:
+  sentry:
+    restart: always
+    image: whatwewant/sentry:${SERVICE_SENTRY_IMAGE_VERSION}
+    environment:
+      PORT: $SERVICE_SENTRY_PORT
+      USERNAME: ${SERVICE_SENTRY_USERNAME}
+      PASSWORD: ${SERVICE_SENTRY_PASSWORD}
+      
+networks:
+  default:
+    external: true
+    name: compose-ingress

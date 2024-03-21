@@ -1,0 +1,82 @@
+services:
+  sentry:
+    restart: always
+    image: whatwewant/sentry:v9-1
+    ports:
+      - ${SERVICE_SENTRY_PORT}:9000
+    environment:
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_POSTGRES_PORT: 5432
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: ${SERVICE_SENTRY_DATABASE_PASSWORD}
+      SENTRY_REDIS_HOST: sentry-redis
+      SENTRY_REDIS_PORT: 6379
+      SENTRY_REDIS_PASSWORD: ${SERVICE_SENTRY_REDIS_PASSWORD}
+      SENTRY_SECRET_KEY: ${SERVICE_SENTRY_SECRET_KEY}
+      SENTRY_EMAIL_HOST: ${SERVICE_SENTRY_EMAIL_HOST}
+      SENTRY_EMAIL_PORT: ${SERVICE_SENTRY_EMAIL_PORT}
+      SENTRY_EMAIL_USER: ${SERVICE_SENTRY_EMAIL_USER}
+      SENTRY_EMAIL_PASSWORD: ${SERVICE_SENTRY_EMAIL_PASSWORD}
+      SENTRY_SERVER_EMAIL: ${SERVICE_SENTRY_SERVER_EMAIL}
+      SENTRY_EMAIL_USE_TLS: 'true'
+      SENTRY_EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+    depends_on:
+      - sentry-postgres
+      - sentry-redis
+
+  sentry-cron:
+    restart: always
+    image: whatwewant/sentry:v9-1
+    command: run cron
+    environment:
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_POSTGRES_PORT: 5432
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: ${SERVICE_SENTRY_DATABASE_PASSWORD}
+      SENTRY_REDIS_HOST: sentry-redis
+      SENTRY_REDIS_PORT: 6379
+      SENTRY_REDIS_PASSWORD: ${SERVICE_SENTRY_REDIS_PASSWORD}
+      SENTRY_SECRET_KEY: ${SERVICE_SENTRY_SECRET_KEY}
+    depends_on:
+      - sentry-postgres
+      - sentry-redis
+      
+  sentry-worker:
+    restart: always
+    image: whatwewant/sentry:v9-1
+    command: run worker
+    environment:
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_POSTGRES_PORT: 5432
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: ${SERVICE_SENTRY_DATABASE_PASSWORD}
+      SENTRY_REDIS_HOST: sentry-redis
+      SENTRY_REDIS_PORT: 6379
+      SENTRY_REDIS_PASSWORD: ${SERVICE_SENTRY_REDIS_PASSWORD}
+      SENTRY_SECRET_KEY: ${SERVICE_SENTRY_SECRET_KEY}
+    depends_on:
+      - sentry-postgres
+      - sentry-redis
+  
+  sentry-redis:
+    restart: always
+    image: whatwewant/redis:v5
+    command: redis-server --requirepass ${SERVICE_SENTRY_REDIS_PASSWORD}
+    volumes:
+      - ${SERVICE_DATA}/redis:/data
+
+  sentry-postgres:
+    restart: always
+    image: whatwewant/postgres:v9.5
+    # command: postgres -c listen_addresses='*'
+    environment:
+      POSTGRES_USER: sentry
+      POSTGRES_PASSWORD: ${SERVICE_SENTRY_DATABASE_PASSWORD}
+      POSTGRES_DB: sentry
+    volumes:
+      - ${SERVICE_DATA}/postgres:/var/lib/postgresql/data
+      
+networks:
+  default:
+    external: true
+    name: compose-ingress
