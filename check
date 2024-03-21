@@ -11,18 +11,23 @@ check() {
   fi
 
   service::config_set SERVICE_SENTRY_PORT text "Port" 8080
-  
+
   service::config_set SERVICE_SENTRY_SECRET_KEY text "Secret Key" $(os::uuid)
 
   service::config_set SERVICE_SENTRY_DATABASE_PASSWORD text "Database PASSWORD" $(os::uuid)
   service::config_set SERVICE_SENTRY_REDIS_PASSWORD text "Redis Password" $(os::uuid)
 
-  service::config_set SERVICE_SENTRY_EMAIL_HOST text "Email Host" "smtp.qq.com"
-  service::config_set SERVICE_SENTRY_EMAIL_PORT text "Email Port" 465
-  service::config_set SERVICE_SENTRY_EMAIL_USER text "Email User"
-  service::config_set SERVICE_SENTRY_EMAIL_PASSWORD text "Email Password"
-  # service::config_set SERVICE_SENTRY_EMAIL_USE_TLS bool "Use TLS" true
-  service::config_set SERVICE_SENTRY_SERVER_EMAIL text "Server Email"
+  if [ -z "$SERVICE_SENTRY_EMAIL_ENABLED" ]; then
+    service::config_set SERVICE_SENTRY_EMAIL_ENABLED yesno "Enable Email" "false"
+    if [ "$SERVICE_SENTRY_EMAIL_ENABLED" = "true" ]; then
+      service::config_set SERVICE_SENTRY_EMAIL_HOST text "Email Host" "smtp.qq.com"
+      service::config_set SERVICE_SENTRY_EMAIL_PORT text "Email Port" 465
+      service::config_set SERVICE_SENTRY_EMAIL_USER text "Email User"
+      service::config_set SERVICE_SENTRY_EMAIL_PASSWORD text "Email Password"
+      # service::config_set SERVICE_SENTRY_EMAIL_USE_TLS bool "Use TLS" true
+      service::config_set SERVICE_SENTRY_SERVER_EMAIL text "Server Email"
+    fi
+  fi
 }
 
 check $@
