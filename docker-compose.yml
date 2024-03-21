@@ -1,7 +1,8 @@
 services:
   sentry:
     restart: always
-    image: whatwewant/sentry:v9-1
+    # image: whatwewant/sentry:v9-1
+    image: sentry:9.1.2
     ports:
       - ${SERVICE_SENTRY_PORT}:9000
     environment:
@@ -26,7 +27,8 @@ services:
 
   sentry-cron:
     restart: always
-    image: whatwewant/sentry:v9-1
+    # image: whatwewant/sentry:v9-1
+    image: sentry:9.1.2
     command: run cron
     environment:
       SENTRY_POSTGRES_HOST: sentry-postgres
@@ -43,7 +45,8 @@ services:
       
   sentry-worker:
     restart: always
-    image: whatwewant/sentry:v9-1
+    # image: whatwewant/sentry:v9-1
+    image: sentry:9.1.2
     command: run worker
     environment:
       SENTRY_POSTGRES_HOST: sentry-postgres
@@ -60,14 +63,16 @@ services:
   
   sentry-redis:
     restart: always
-    image: whatwewant/redis:v5
+    # image: whatwewant/redis:v5
+    image: redis:5-alpine
     command: redis-server --requirepass ${SERVICE_SENTRY_REDIS_PASSWORD}
     volumes:
       - ${SERVICE_DATA}/redis:/data
 
   sentry-postgres:
     restart: always
-    image: whatwewant/postgres:v9.5
+    # image: whatwewant/postgres:v9.5
+    image: postgres:9.5-alpine
     # command: postgres -c listen_addresses='*'
     environment:
       POSTGRES_USER: sentry
